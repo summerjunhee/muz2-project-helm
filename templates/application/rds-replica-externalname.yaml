@@ -1,0 +1,19 @@
+- templates/application/redis-externalname.yaml
+    
+    ```jsx
+    {{- if .Values.externalServices.redis.enabled }}
+    apiVersion: v1
+    kind: Service
+    metadata:
+      name: {{ .Values.externalServices.redis.name }}
+      namespace: {{ .Values.namespace.name }}
+      labels:
+        app: muze-web
+        component: redis
+        env: prod
+        managed-by: helm
+    spec:
+      type: ExternalName
+      externalName: {{ .Values.externalServices.redis.externalName }}
+    {{- end }}
+    ```

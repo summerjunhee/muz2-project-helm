@@ -1,0 +1,89 @@
+# ============================================
+# Stage Environment Override
+# ============================================
+global:
+  environment: stage
+
+application:
+  replicaCount: 1  # Stage는 replica 줄임
+  
+  image:
+    tag: stage-v1
+  
+  serviceAccount:
+    name: muze-stage-sa
+  
+  secrets:
+    name: muze-app-secrets
+
+service:
+  nodePort: 30081  # Stage는 다른 포트
+
+ingress:
+  annotations:
+    alb.ingress.kubernetes.io/load-balancer-name: muze-stage-alb
+    alb.ingress.kubernetes.io/group.name: muze-stage-group
+    external-dns.alpha.kubernetes.io/hostname: stage.muz-e.com
+  
+  hosts:
+    - host: stage.muz-e.com
+      paths:
+        - path: /
+          pathType: Prefix
+
+externalServices:
+  rds:
+    name: rds-service-stage
+    externalName: stage - rds - address
+  
+  rdsReplica:
+    name: rds-replica-stage
+    externalName: stage - replica - address
+  
+  redis:
+    name: redis-service-stage
+    externalName: muze-stage-redis.xxxxx.cache.amazonaws.com
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 250m
+    memory: 256Mi
+
+
+# External Secrets (Dev 환경)
+externalSecrets:
+  enabled: true
+  secretStore:
+    name: aws-ssm-store-dev
+  externalSecret:
+    name: muze-app-secrets-dev
+    refreshInterval: 5m  # ⬅️ Dev는 더 자주 동기화
+    data:
+      # Dev SSM 경로
+      - secretKey: SECRET_KEY
+        remoteRef:
+          key: /muze/dev/SECRET_KEY  # ⬅️ 변경: Dev SSM 경로
+      - secretKey: DB_NAME
+        remoteRef:
+          key: /muze/dev/DB_NAME
+      - secretKey: DB_USER
+        remoteRef:
+          key: /muze/dev/DB_USER
+      - secretKey: DB_PASSWORD
+        remoteRef:
+          key: /muze/dev/DB_PASSWORD
+      - secretKey: DB_PORT
+        remoteRef:
+          key: /muze/dev/DB_PORT
+      - secretKey: REDIS_PORT
+        remoteRef:
+          key: /muze/dev/REDIS_PORT
+      - secretKey: REDIS_DB
+        remoteRef:
+          key: /muze/dev/REDIS_DB
+      - secretKey: REDIS_PASS
+        remoteRef:
+          key: /muze/dev/REDIS_PASS

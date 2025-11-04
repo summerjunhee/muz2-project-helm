@@ -1,0 +1,56 @@
+# Production Environment Values
+# Override default values for production deployment
+
+application:
+  replicaCount: 2
+  image:
+    tag: v9
+    pullPolicy: Always
+
+resources:
+  limits:
+    memory: 1Gi
+    cpu: 1000m
+  requests:
+    memory: 512Mi
+    cpu: 500m
+
+
+ingress:
+  enabled: true
+  annotations:
+    alb.ingress.kubernetes.io/load-balancer-name: muze-prod-alb
+    alb.ingress.kubernetes.io/group.name: muze-prod-group
+
+
+# External Secrets (Production 환경)
+externalSecrets:
+  enabled: true
+  externalSecret:
+    refreshInterval: 1h
+    data:
+      # Production SSM 경로
+      - secretKey: SECRET_KEY
+        remoteRef:
+          key: /muze/prod/SECRET_KEY  # ⬅️ 변경: Production SSM 경로
+      - secretKey: DB_NAME
+        remoteRef:
+          key: /muze/prod/DB_NAME
+      - secretKey: DB_USER
+        remoteRef:
+          key: /muze/prod/DB_USER
+      - secretKey: DB_PASSWORD
+        remoteRef:
+          key: /muze/prod/DB_PASSWORD
+      - secretKey: DB_PORT
+        remoteRef:
+          key: /muze/prod/DB_PORT
+      - secretKey: REDIS_PORT
+        remoteRef:
+          key: /muze/prod/REDIS_PORT
+      - secretKey: REDIS_DB
+        remoteRef:
+          key: /muze/prod/REDIS_DB
+      - secretKey: REDIS_PASS
+        remoteRef:
+          key: /muze/prod/REDIS_PASS

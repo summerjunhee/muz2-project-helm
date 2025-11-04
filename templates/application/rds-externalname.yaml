@@ -1,0 +1,15 @@
+{{- if .Values.externalServices.rds.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.externalServices.rds.primary.name }}
+  namespace: {{ .Values.namespace.name }}
+  labels:
+    app: muze-web
+    component: rds
+    env: prod
+    managed-by: helm
+spec:
+  type: ExternalName
+  externalName: {{ .Values.externalServices.rds.primary.externalName }}
+{{- end }}

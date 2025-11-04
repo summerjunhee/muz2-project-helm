@@ -1,0 +1,146 @@
+# Default values for muze-web chart
+# This is a YAML-formatted file.
+
+# AWS 설정
+aws:
+  region: ap-northeast-2
+  accountId: "620455725858"
+  
+# Namespace 설정
+namespace:
+  name: web
+
+# AWS Auth 설정
+awsAuth:
+  enabled: true
+  users:
+    - userarn: arn:aws:iam::620455725858:user/TerraformUser
+      username: TerraformUser
+      groups:
+        - system:masters
+    - userarn: arn:aws:iam::620455725858:user/admin
+      username: admin
+      groups:
+        - system:masters
+
+# RBAC 설정
+rbac:
+  enabled: true
+  adminUsers:
+    - arn:aws:iam::620455725858:user/admin
+    - arn:aws:iam::620455725858:user/TerraformUser
+
+# ALB Controller 설정
+albController:
+  enabled: true
+  serviceAccount:
+    name: aws-load-balancer-controller
+    namespace: kube-system
+    roleArn: arn:aws:iam::620455725858:role/AmazonEKSLoadBalancerControllerRole
+
+# Application 설정
+application:
+  name: muze-web
+  replicaCount: 2
+  
+  image:
+    repository: 620455725858.dkr.ecr.ap-northeast-2.amazonaws.com/muze
+    tag: v9
+    pullPolicy: Always
+  
+  imagePullSecrets:
+    - name: ecr-secret
+  
+  container:
+    port: 8000
+
+# Service 설정
+service:
+  type: NodePort
+  port: 80
+  targetPort: 8000
+  nodePort: 30080
+
+# Ingress 설정
+ingress:
+  enabled: true
+  className: alb
+  annotations:
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: instance
+    alb.ingress.kubernetes.io/load-balancer-name: muze-prod-alb
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP":80},{"HTTPS":443}]'
+    alb.ingress.kubernetes.io/ssl-redirect: '443'
+    alb.ingress.kubernetes.io/group.name: muze-prod-group
+    alb.ingress.kubernetes.io/group.order: "10"
+  
+  certificateArn: arn:aws:acm:ap-northeast-2:620455725858:certificate/d980c0cb-8540-4d44-bf77-46c527df9e7b
+  
+  hosts:
+    - host: www.muz-e.com
+      paths:
+        - path: /
+          pathType: Prefix
+  
+  externalDns:
+    enabled: true
+    hostname: www.muz-e.com
+
+# External Services 설정
+externalServices:
+  rds:
+    enabled: true
+    primary:
+      name: rds-service-prod
+      externalName: eks-rds.cjk6a0asc67f.ap-northeast-2.rds.amazonaws.com
+    replica:
+      name: rds-replica-prod
+      externalName: eks-rds-replica.cjk6a0asc67f.ap-northeast-2.rds.amazonaws.com
+  
+  redis:
+    enabled: true
+    name: redis-service-prod
+    externalName: muze-redis.kj5slr.ng.0001.apn2.cache.amazonaws.com
+
+
+# External Secrets (Production 환경)
+externalSecrets:
+  enabled: true
+  externalSecret:
+    refreshInterval: 1h
+    data:
+      # Production SSM 경로
+      - secretKey: SECRET_KEY
+        remoteRef:
+          key: /muze/prod/SECRET_KEY  # ⬅️ 변경: Production SSM 경로
+      - secretKey: DB_NAME
+        remoteRef:
+          key: /muze/prod/DB_NAME
+      - secretKey: DB_USER
+        remoteRef:
+          key: /muze/prod/DB_USER
+      - secretKey: DB_PASSWORD
+        remoteRef:
+          key: /muze/prod/DB_PASSWORD
+      - secretKey: DB_PORT
+        remoteRef:
+          key: /muze/prod/DB_PORT
+      - secretKey: REDIS_PORT
+        remoteRef:
+          key: /muze/prod/REDIS_PORT
+      - secretKey: REDIS_DB
+        remoteRef:
+          key: /muze/prod/REDIS_DB
+      - secretKey: REDIS_PASS
+        remoteRef:
+          key: /muze/prod/REDIS_PASS
+
+
+# 리소스 제한
+resources:
+  limits:
+    memory: 512Mi
+    cpu: 500m
+  requests:
+    memory: 256Mi
+    cpu: 250m
