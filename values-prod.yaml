@@ -4,7 +4,7 @@
 application:
   replicaCount: 2
   image:
-    tag: v9
+    tag: v10
     pullPolicy: Always
 
 resources:
@@ -16,11 +16,35 @@ resources:
     cpu: 500m
 
 
+service:
+  type: NodePort           # 반드시 NodePort
+  port: 80
+  targetPort: 8000
+  nodePort: 30080          # 선택: NodePort 고정 (삭제해도 OK)
+
+# ---------------------------------------
+# Ingress (Disabled for Prod)
+# ---------------------------------------
 ingress:
   enabled: true
+  className: alb
   annotations:
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: instance
     alb.ingress.kubernetes.io/load-balancer-name: muze-prod-alb
+    alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:ap-northeast-2:620455725858:certificate/d980c0cb-8540-4d44-bf77-46c527df9e7b
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP":80},{"HTTPS":443}]'
+    alb.ingress.kubernetes.io/ssl-redirect: '443'
     alb.ingress.kubernetes.io/group.name: muze-prod-group
+    alb.ingress.kubernetes.io/group.order: "10"
+    external-dns.alpha.kubernetes.io/hostname: www.muz-e.com
+  hosts:
+  - host: www.muz-e.com
+    paths:
+    - path: /
+      pathType: Prefix
+
+
 
 
 # External Secrets (Production 환경)
@@ -32,7 +56,7 @@ externalSecrets:
       # Production SSM 경로
       - secretKey: SECRET_KEY
         remoteRef:
-          key: /muze/prod/SECRET_KEY  # ⬅️ 변경: Production SSM 경로
+          key: /muze/prod/SECRET_KEY
       - secretKey: DB_NAME
         remoteRef:
           key: /muze/prod/DB_NAME
@@ -54,3 +78,10 @@ externalSecrets:
       - secretKey: REDIS_PASS
         remoteRef:
           key: /muze/prod/REDIS_PASS
+      - secretKey: WEB_S3_BUCKET_NAME
+        remoteRef:
+          key: /muze/prod/WEB_S3_BUCKET_NAME
+      - secretKey: AWS_REGION
+        remoteRef:
+          key: /muze/prod/AWS_REGION
+

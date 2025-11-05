@@ -1,19 +1,17 @@
-- templates/application/redis-externalname.yaml
-    
-    ```jsx
-    {{- if .Values.externalServices.redis.enabled }}
-    apiVersion: v1
-    kind: Service
-    metadata:
-      name: {{ .Values.externalServices.redis.name }}
-      namespace: {{ .Values.namespace.name }}
-      labels:
-        app: muze-web
-        component: redis
-        env: prod
-        managed-by: helm
-    spec:
-      type: ExternalName
-      externalName: {{ .Values.externalServices.redis.externalName }}
-    {{- end }}
-    ```
+{{- if .Values.externalServices.rds.enabled }}
+{{- if .Values.externalServices.rds.replica }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.externalServices.rds.replica.name }}
+  namespace: {{ .Values.namespace.name | default .Release.Namespace }}
+  labels:
+    app: {{ .Values.application.name | default .Chart.Name }}
+    component: rds-replica
+    env: {{ .Values.global.environment | default "prod" }}
+    managed-by: helm
+spec:
+  type: ExternalName
+  externalName: {{ .Values.externalServices.rds.replica.externalName }}
+{{- end }}
+{{- end }}

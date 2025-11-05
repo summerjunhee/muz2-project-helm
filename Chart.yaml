@@ -1,0 +1,13 @@
+apiVersion: v2
+name: muze-web
+description: Muze Web Application Helm Chart for EKS
+type: application
+version: 1.0.0
+appVersion: "v10"
+keywords:
+  - muze
+  - web
+  - eks
+  - aws
+maintainers:
+  - name: Muze Team

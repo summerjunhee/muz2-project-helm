@@ -1,34 +1,14 @@
 # Default values for muze-web chart
 # This is a YAML-formatted file.
 
-# AWS 설정
-aws:
-  region: ap-northeast-2
-  accountId: "620455725858"
-  
+global:
+  environment: prod         # 네임스페이스 이름으로 쓰려던 값
+  project: muze
+
 # Namespace 설정
 namespace:
   name: web
 
-# AWS Auth 설정
-awsAuth:
-  enabled: true
-  users:
-    - userarn: arn:aws:iam::620455725858:user/TerraformUser
-      username: TerraformUser
-      groups:
-        - system:masters
-    - userarn: arn:aws:iam::620455725858:user/admin
-      username: admin
-      groups:
-        - system:masters
-
-# RBAC 설정
-rbac:
-  enabled: true
-  adminUsers:
-    - arn:aws:iam::620455725858:user/admin
-    - arn:aws:iam::620455725858:user/TerraformUser
 
 # ALB Controller 설정
 albController:
@@ -45,7 +25,7 @@ application:
   
   image:
     repository: 620455725858.dkr.ecr.ap-northeast-2.amazonaws.com/muze
-    tag: v9
+    tag: v10
     pullPolicy: Always
   
   imagePullSecrets:
@@ -53,6 +33,11 @@ application:
   
   container:
     port: 8000
+  
+  serviceAccount:
+    enabled: true          # Deployment.yaml에서 if문에 걸림
+    name: muze-web-sa      # 실제 존재하거나 Helm이 만들 SA 이름
+    create: false          # IRSA면 false (이미 존재)
 
 # Service 설정
 service:
@@ -61,7 +46,26 @@ service:
   targetPort: 8000
   nodePort: 30080
 
-# Ingress 설정
+# Health Check 추가
+livenessProbe:
+  enabled: true
+  path: /health
+  initialDelaySeconds: 30
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 3
+  
+readinessProbe:
+  enabled: true
+  path: /health
+  initialDelaySeconds: 10
+  periodSeconds: 5
+  timeoutSeconds: 3
+  failureThreshold: 3
+
+# ---------------------------------------
+# Ingress (prod에만 적용)
+# ---------------------------------------
 ingress:
   enabled: true
   className: alb
@@ -86,7 +90,7 @@ ingress:
     enabled: true
     hostname: www.muz-e.com
 
-# External Services 설정
+# External Services 설정 (prod 환경에만 적용)
 externalServices:
   rds:
     enabled: true
@@ -102,17 +106,28 @@ externalServices:
     name: redis-service-prod
     externalName: muze-redis.kj5slr.ng.0001.apn2.cache.amazonaws.com
 
-
-# External Secrets (Production 환경)
+# External Secrets 설정 (prod 환경에만 적용)
 externalSecrets:
-  enabled: true
+  enabled: true  # ⬅️ 새로 추가: External Secrets 사용 여부
+  
+  secretStore:
+    name: aws-ssm-store  # ⬅️ 선택: SecretStore 이름
+    provider: ParameterStore  # ⬅️ 선택: ParameterStore 또는 SecretsManager
+    region: ap-northeast-2  # ⬅️ 변경: AWS 리전
+ 
+  serviceAccount:
+    name: muze-web-sa
+    create: false   # 이미 존재(IRSA)하면 false
+
   externalSecret:
-    refreshInterval: 1h
+    name: muze-app-secrets  # ⬅️ 선택: 생성될 Secret 이름
+    refreshInterval: 1h  # ⬅️ 선택: SSM 동기화 주기 (1h, 5m, 30s 등)
+
     data:
       # Production SSM 경로
       - secretKey: SECRET_KEY
         remoteRef:
-          key: /muze/prod/SECRET_KEY  # ⬅️ 변경: Production SSM 경로
+          key: /muze/prod/SECRET_KEY
       - secretKey: DB_NAME
         remoteRef:
           key: /muze/prod/DB_NAME
@@ -134,13 +149,57 @@ externalSecrets:
       - secretKey: REDIS_PASS
         remoteRef:
           key: /muze/prod/REDIS_PASS
+      - secretKey: WEB_S3_BUCKET_NAME
+        remoteRef:
+          key: /muze/prod/WEB_S3_BUCKET_NAME
+      - secretKey: AWS_REGION
+        remoteRef:
+          key: /muze/prod/AWS_REGION
+
+# ==========================================
+# HPA 설정 (새로 추가)
+# ==========================================
+
+hpa:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 5
+  targetCPUUtilizationPercentage: 70
+  targetMemoryUtilizationPercentage: 80
+
+# ==========================================
+# Cluster Autoscaler 설정 (새로 추가)
+# ==========================================
+
+clusterAutoscaler:
+  enabled: true
+  clusterName: "my-eks"  # 실제 클러스터 이름으로 변경
+  awsIamRoleArn: "arn:aws:iam::620455725858:role/AmazonEKSClusterAutoscalerRole"
+  image: "registry.k8s.io/autoscaling/cluster-autoscaler"
+  imageTag: "v1.28.2"
 
 
-# 리소스 제한
+
+# ---------------------------------------
+# 리소스 설정 (prod와 다른 설정으로 변경)
+# ---------------------------------------
 resources:
   limits:
     memory: 512Mi
     cpu: 500m
   requests:
-    memory: 256Mi
-    cpu: 250m
+    memory: 512Mi
+    cpu: 500m
+
+
+
+
+# ==========================================
+# Cluster Autoscaler 설정
+# ==========================================
+clusterAutoscaler:
+  enabled: true
+  serviceAccountName: "cluster-autoscaler"
+  clusterName: "prod-eks-cluster"
+  image: "registry.k8s.io/autoscaling/cluster-autoscaler"
+  imageTag: "v1.32.4"

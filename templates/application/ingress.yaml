@@ -1,22 +1,33 @@
-{{- if .Values.ingress.enabled }}
+{{- if and .Values.ingress.enabled (gt (len .Values.ingress.hosts) 0) }}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: {{ .Values.application.name }}-ingress
+  {{- if .Values.namespace.name }}
   namespace: {{ .Values.namespace.name }}
+  {{- end }}
   labels:
     app: {{ .Values.application.name }}
     managed-by: helm
   annotations:
+    {{- if .Values.ingress.className }}
     kubernetes.io/ingress.class: {{ .Values.ingress.className }}
-    {{- range $key, $value := .Values.ingress.annotations }}
+    {{- end }}
+    {{- with .Values.ingress.annotations }}
+    {{- range $key, $value := . }}
     {{ $key }}: {{ $value | quote }}
     {{- end }}
-    alb.ingress.kubernetes.io/certificate-arn: {{ .Values.ingress.certificateArn }}
-    {{- if .Values.ingress.externalDns.enabled }}
-    external-dns.alpha.kubernetes.io/hostname: {{ .Values.ingress.externalDns.hostname }}
+    {{- end }}
+    {{- if .Values.ingress.certificateArn }}
+    alb.ingress.kubernetes.io/certificate-arn: {{ .Values.ingress.certificateArn | quote }}
+    {{- end }}
+    {{- if and .Values.ingress.externalDns.enabled .Values.ingress.externalDns.hostname }}
+    external-dns.alpha.kubernetes.io/hostname: {{ .Values.ingress.externalDns.hostname | quote }}
     {{- end }}
 spec:
+  {{- if .Values.ingress.className }}
+  ingressClassName: {{ .Values.ingress.className }}
+  {{- end }}
   rules:
   {{- range .Values.ingress.hosts }}
     - host: {{ .host }}
@@ -33,3 +44,4 @@ spec:
         {{- end }}
   {{- end }}
 {{- end }}
+
