@@ -2,14 +2,11 @@
 # This is a YAML-formatted file.
 
 global:
-  environment: prod         # 네임스페이스 이름으로 쓰려던 값
+  environment: prod # 네임스페이스 이름으로 쓰려던 값
   project: muze
-
 # Namespace 설정
 namespace:
   name: web
-
-
 # ALB Controller 설정
 albController:
   enabled: true
@@ -17,35 +14,28 @@ albController:
     name: aws-load-balancer-controller
     namespace: kube-system
     roleArn: arn:aws:iam::620455725858:role/AmazonEKSLoadBalancerControllerRole
-
 # Application 설정
 application:
   name: muze-web
   replicaCount: 2
-  
   image:
     repository: 620455725858.dkr.ecr.ap-northeast-2.amazonaws.com/muze
-    tag: v10
+    tag: "37124"
     pullPolicy: Always
-  
   imagePullSecrets:
     - name: ecr-secret
-  
   container:
     port: 8000
-  
   serviceAccount:
-    enabled: true          # Deployment.yaml에서 if문에 걸림
-    name: muze-web-sa      # 실제 존재하거나 Helm이 만들 SA 이름
-    create: false          # IRSA면 false (이미 존재)
-
+    enabled: true # Deployment.yaml에서 if문에 걸림
+    name: muze-web-sa # 실제 존재하거나 Helm이 만들 SA 이름
+    create: false # IRSA면 false (이미 존재)
 # Service 설정
 service:
   type: NodePort
   port: 80
   targetPort: 8000
   nodePort: 30080
-
 # Health Check 추가
 livenessProbe:
   enabled: true
@@ -54,7 +44,6 @@ livenessProbe:
   periodSeconds: 10
   timeoutSeconds: 5
   failureThreshold: 3
-  
 readinessProbe:
   enabled: true
   path: /
@@ -62,7 +51,6 @@ readinessProbe:
   periodSeconds: 5
   timeoutSeconds: 3
   failureThreshold: 3
-
 # ---------------------------------------
 # Ingress (prod에만 적용)
 # ---------------------------------------
@@ -77,19 +65,15 @@ ingress:
     alb.ingress.kubernetes.io/ssl-redirect: '443'
     alb.ingress.kubernetes.io/group.name: muze-prod-group
     alb.ingress.kubernetes.io/group.order: "10"
-  
   certificateArn: arn:aws:acm:ap-northeast-2:620455725858:certificate/d980c0cb-8540-4d44-bf77-46c527df9e7b
-  
   hosts:
     - host: www.muz-e.com
       paths:
         - path: /
           pathType: Prefix
-  
   externalDns:
     enabled: true
     hostname: www.muz-e.com
-
 # External Services 설정 (prod 환경에만 적용)
 externalServices:
   rds:
@@ -100,29 +84,23 @@ externalServices:
     replica:
       name: rds-replica-prod
       externalName: eks-rds-replica.cjk6a0asc67f.ap-northeast-2.rds.amazonaws.com
-  
   redis:
     enabled: true
     name: redis-service-prod
     externalName: muze-redis.kj5slr.ng.0001.apn2.cache.amazonaws.com
-
 # External Secrets 설정 (prod 환경에만 적용)
 externalSecrets:
-  enabled: true  # ⬅️ 새로 추가: External Secrets 사용 여부
-  
+  enabled: true # ⬅️ 새로 추가: External Secrets 사용 여부
   secretStore:
-    name: aws-ssm-store  # ⬅️ 선택: SecretStore 이름
-    provider: ParameterStore  # ⬅️ 선택: ParameterStore 또는 SecretsManager
-    region: ap-northeast-2  # ⬅️ 변경: AWS 리전
- 
+    name: aws-ssm-store # ⬅️ 선택: SecretStore 이름
+    provider: ParameterStore # ⬅️ 선택: ParameterStore 또는 SecretsManager
+    region: ap-northeast-2 # ⬅️ 변경: AWS 리전
   serviceAccount:
     name: muze-web-sa
-    create: false   # 이미 존재(IRSA)하면 false
-
+    create: false # 이미 존재(IRSA)하면 false
   externalSecret:
-    name: muze-app-secrets  # ⬅️ 선택: 생성될 Secret 이름
-    refreshInterval: 1h  # ⬅️ 선택: SSM 동기화 주기 (1h, 5m, 30s 등)
-
+    name: muze-app-secrets # ⬅️ 선택: 생성될 Secret 이름
+    refreshInterval: 1h # ⬅️ 선택: SSM 동기화 주기 (1h, 5m, 30s 등)
     data:
       # Production SSM 경로
       - secretKey: SECRET_KEY
@@ -155,31 +133,24 @@ externalSecrets:
       - secretKey: AWS_REGION
         remoteRef:
           key: /muze/prod/AWS_REGION
-
 # ==========================================
 # HPA 설정 (새로 추가)
 # ==========================================
-
 hpa:
   enabled: true
   minReplicas: 2
   maxReplicas: 5
   targetCPUUtilizationPercentage: 70
   targetMemoryUtilizationPercentage: 80
-
 # ==========================================
 # Cluster Autoscaler 설정 (새로 추가)
 # ==========================================
-
 clusterAutoscaler:
   enabled: true
-  clusterName: "my-eks"  # 실제 클러스터 이름으로 변경
+  clusterName: "my-eks" # 실제 클러스터 이름으로 변경
   awsIamRoleArn: "arn:aws:iam::620455725858:role/AmazonEKSClusterAutoscalerRole"
   image: "registry.k8s.io/autoscaling/cluster-autoscaler"
   imageTag: "v1.28.2"
-
-
-
 # ---------------------------------------
 # 리소스 설정 (prod와 다른 설정으로 변경)
 # ---------------------------------------
@@ -190,10 +161,6 @@ resources:
   requests:
     memory: 512Mi
     cpu: 500m
-
-
-
-
 # ==========================================
 # Cluster Autoscaler 설정
 # ==========================================
