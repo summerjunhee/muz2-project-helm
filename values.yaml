@@ -20,7 +20,7 @@ application:
   replicaCount: 2
   image:
     repository: 620455725858.dkr.ecr.ap-northeast-2.amazonaws.com/muze
-    tag: "37124"
+    tag: "3ab00"
     pullPolicy: Always
   imagePullSecrets:
     - name: ecr-secret
