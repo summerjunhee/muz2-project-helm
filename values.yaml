@@ -2,7 +2,7 @@
 # This is a YAML-formatted file.
 
 global:
-  environment: prod # 네임스페이스 이름으로 쓰려던 값
+  environment: web # 네임스페이스 이름으로 쓰려던 값
   project: muze
 # Namespace 설정
 namespace:
