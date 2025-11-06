@@ -2,8 +2,9 @@
 # This is a YAML-formatted file.
 
 global:
+  environment: prod # 네임스페이스 이름으로 쓰려던 값
   project: muze
-
+# Namespace 설정
 namespace:
   name: web
 # ALB Controller 설정
@@ -16,10 +17,10 @@ albController:
 # Application 설정
 application:
   name: muze-web
-  replicaCount: 2
+  replicaCount: 3
   image:
     repository: 620455725858.dkr.ecr.ap-northeast-2.amazonaws.com/muze
-    tag: "10e7b"
+    tag: v10
     pullPolicy: Always
   imagePullSecrets:
     - name: ecr-secret
@@ -141,6 +142,15 @@ hpa:
   maxReplicas: 5
   targetCPUUtilizationPercentage: 70
   targetMemoryUtilizationPercentage: 80
+# ==========================================
+# Cluster Autoscaler 설정 (새로 추가)
+# ==========================================
+clusterAutoscaler:
+  enabled: true
+  clusterName: "my-eks" # 실제 클러스터 이름으로 변경
+  awsIamRoleArn: "arn:aws:iam::620455725858:role/AmazonEKSClusterAutoscalerRole"
+  image: "registry.k8s.io/autoscaling/cluster-autoscaler"
+  imageTag: "v1.28.2"
 # ---------------------------------------
 # 리소스 설정 (prod와 다른 설정으로 변경)
 # ---------------------------------------
@@ -151,3 +161,12 @@ resources:
   requests:
     memory: 512Mi
     cpu: 500m
+# ==========================================
+# Cluster Autoscaler 설정
+# ==========================================
+clusterAutoscaler:
+  enabled: true
+  serviceAccountName: "cluster-autoscaler"
+  clusterName: "prod-eks-cluster"
+  image: "registry.k8s.io/autoscaling/cluster-autoscaler"
+  imageTag: "v1.32.4"
