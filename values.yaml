@@ -21,7 +21,7 @@ application:
   replicaCount: 2
   image:
     repository: 620455725858.dkr.ecr.ap-northeast-2.amazonaws.com/muze
-    tag: "01693"
+    tag: "6a3d6"
     pullPolicy: Always
   imagePullSecrets:
     - name: ecr-secret
@@ -143,20 +143,16 @@ hpa:
   maxReplicas: 5
   targetCPUUtilizationPercentage: 70
   targetMemoryUtilizationPercentage: 80
-  
   # 스케일 다운 설정 (더 빠르게 축소)
-  scaleDownStabilizationWindowSeconds: 60  # 기본 300초 → 60초로 단축
-  scaleDownPercentage: 50                   # 60초마다 최대 50% 축소 가능
-  scaleDownPods: 1                          # 또는 60초마다 최대 1개 Pod 축소
+  scaleDownStabilizationWindowSeconds: 60 # 기본 300초 → 60초로 단축
+  scaleDownPercentage: 50 # 60초마다 최대 50% 축소 가능
+  scaleDownPods: 1 # 또는 60초마다 최대 1개 Pod 축소
   scaleDownPeriodSeconds: 60
-  
   # 스케일 업 설정 (빠르게 확장)
-  scaleUpStabilizationWindowSeconds: 0      # 즉시 반응
-  scaleUpPercentage: 100                    # 15초마다 최대 100% 확장 가능
-  scaleUpPods: 2                            # 또는 15초마다 최대 2개 Pod 추가
+  scaleUpStabilizationWindowSeconds: 0 # 즉시 반응
+  scaleUpPercentage: 100 # 15초마다 최대 100% 확장 가능
+  scaleUpPods: 2 # 또는 15초마다 최대 2개 Pod 추가
   scaleUpPeriodSeconds: 15
-
-
 # ---------------------------------------
 # 리소스 설정 (prod와 다른 설정으로 변경)
 # ---------------------------------------
