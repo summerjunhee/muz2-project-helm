@@ -7,6 +7,7 @@ global:
 # Namespace 설정
 namespace:
   name: web
+  create: false
 # ALB Controller 설정
 albController:
   enabled: true

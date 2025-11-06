@@ -1,7 +1,9 @@
+{{- if .Values.namespace.create }}
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: {{ .Values.global.environment }}
+  name: {{ .Values.namespace.name }}
   labels:
-    name: {{ .Values.global.environment }}
+    name: {{ .Values.namespace.name }}
     project: {{ .Values.global.project }}
+{{- end }}
