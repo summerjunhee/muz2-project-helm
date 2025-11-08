@@ -67,7 +67,7 @@ ingress:
     alb.ingress.kubernetes.io/group.order: "10"
   certificateArn: arn:aws:acm:ap-northeast-2:620455725858:certificate/d980c0cb-8540-4d44-bf77-46c527df9e7b
   hosts:
-    - host: www.muz-e.com
+    - host: aaa.muz-e.com
       paths:
         - path: /
           pathType: Prefix
