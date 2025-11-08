@@ -2,7 +2,7 @@
 # This is a YAML-formatted file.
 
 global:
-  environment: prod # 네임스페이스 이름으로 쓰려던 값
+  environment: stage # 네임스페이스 이름으로 쓰려던 값
   project: muze
 # Namespace 설정
 namespace:
@@ -20,7 +20,7 @@ application:
   name: muze-web
   replicaCount: 2
   image:
-    repository: 620455725858.dkr.ecr.ap-northeast-2.amazonaws.com/muze
+    repository: 620455725858.dkr.ecr.ap-northeast-2.amazonaws.com/muz2
     tag: "f37a2"
     pullPolicy: Always
   imagePullSecrets:
@@ -60,10 +60,10 @@ ingress:
   annotations:
     alb.ingress.kubernetes.io/scheme: internet-facing
     alb.ingress.kubernetes.io/target-type: ip # instance에서 ip로 변경
-    alb.ingress.kubernetes.io/load-balancer-name: muze-prod-alb
+    alb.ingress.kubernetes.io/load-balancer-name: muze-stage-alb
     alb.ingress.kubernetes.io/listen-ports: '[{"HTTP":80},{"HTTPS":443}]'
     alb.ingress.kubernetes.io/ssl-redirect: '443'
-    alb.ingress.kubernetes.io/group.name: muze-prod-group
+    alb.ingress.kubernetes.io/group.name: muze-stage-group
     alb.ingress.kubernetes.io/group.order: "10"
   certificateArn: arn:aws:acm:ap-northeast-2:620455725858:certificate/d980c0cb-8540-4d44-bf77-46c527df9e7b
   hosts:
@@ -73,20 +73,20 @@ ingress:
           pathType: Prefix
   externalDns:
     enabled: true
-    hostname: www.muz-e.com
+    hostname: aaa.muz-e.com
 # External Services 설정 (prod 환경에만 적용)
 externalServices:
   rds:
     enabled: true
     primary:
-      name: rds-service-prod
-      externalName: eks-rds.cjk6a0asc67f.ap-northeast-2.rds.amazonaws.com
+      name: rds-service-stage
+      externalName: eks-rds-stage.cjk6a0asc67f.ap-northeast-2.rds.amazonaws.com
     replica:
-      name: rds-replica-prod
-      externalName: eks-rds-replica.cjk6a0asc67f.ap-northeast-2.rds.amazonaws.com
+      name: rds-replica-stage
+      externalName: eks-rds-stage-replica.cjk6a0asc67f.ap-northeast-2.rds.amazonaws.com
   redis:
     enabled: true
-    name: redis-service-prod
+    name: redis-service-stage
     externalName: muze-redis.kj5slr.ng.0001.apn2.cache.amazonaws.com
 # External Secrets 설정 (prod 환경에만 적용)
 externalSecrets:
