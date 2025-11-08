@@ -65,7 +65,7 @@ ingress:
     alb.ingress.kubernetes.io/ssl-redirect: '443'
     alb.ingress.kubernetes.io/group.name: muze-stage-group
     alb.ingress.kubernetes.io/group.order: "10"
-  certificateArn: arn:aws:acm:ap-northeast-2:620455725858:certificate/e723fff0-4e21-4dd8-ab95-401b59821cf4
+  certificateArn: arn:aws:acm:ap-northeast-2:620455725858:certificate/c04d3298-0fef-4cf0-9842-bf2d28c6d7ec
   hosts:
     - host: www.muz-e.click
       paths:
