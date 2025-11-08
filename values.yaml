@@ -26,7 +26,7 @@ application:
   imagePullSecrets:
     - name: ecr-secret
   container:
-    port: 8000
+    port: 80
   serviceAccount:
     enabled: true # Deployment.yaml에서 if문에 걸림
     name: muze-web-sa # 실제 존재하거나 Helm이 만들 SA 이름
@@ -35,7 +35,7 @@ application:
 service:
   type: ClusterIP
   port: 80
-  targetPort: 8000
+  targetPort: 80
 # Health Check 추가
 livenessProbe:
   enabled: true
