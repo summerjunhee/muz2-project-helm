@@ -158,8 +158,8 @@ hpa:
 # ---------------------------------------
 resources:
   limits:
-    memory: 512Mi
+    memory: 1Gi      # 512Mi → 1Gi로 변경
     cpu: 500m
   requests:
-    memory: 512Mi
+    memory: 1Gi      # 512Mi → 1Gi로 변경
     cpu: 500m
