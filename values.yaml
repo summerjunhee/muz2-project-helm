@@ -37,20 +37,20 @@ service:
   port: 80
   targetPort: 8000
 # Health Check 추가
-#livenessProbe:
-  #enabled: true
-  #path: /
-  #initialDelaySeconds: 30
-  #periodSeconds: 10
-  #timeoutSeconds: 2
-  #failureThreshold: 3
-#readinessProbe:
-  #enabled: true
-  #path: /
-  #initialDelaySeconds: 10
-  #periodSeconds: 5
-  #timeoutSeconds: 2
-  #failureThreshold: 6
+livenessProbe:
+  enabled: true
+  path: /
+  initialDelaySeconds: 30
+  periodSeconds: 10
+  timeoutSeconds: 2
+  failureThreshold: 3
+readinessProbe:
+  enabled: true
+  path: /
+  initialDelaySeconds: 10
+  periodSeconds: 5
+  timeoutSeconds: 2
+  failureThreshold: 6
 # ---------------------------------------
 # Ingress (prod에만 적용)
 # ---------------------------------------
