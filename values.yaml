@@ -87,7 +87,7 @@ externalServices:
   redis:
     enabled: true
     name: redis-service-stage
-    externalName: muze-redis.kj5slr.ng.0001.apn2.cache.amazonaws.com:6379
+    externalName: muze-redis.kj5slr.ng.0001.apn2.cache.amazonaws.com
 # External Secrets 설정 (prod 환경에만 적용)
 externalSecrets:
   enabled: true # ⬅️ 새로 추가: External Secrets 사용 여부
